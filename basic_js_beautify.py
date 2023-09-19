@@ -1,3 +1,5 @@
+import sys
+
 def add_newline_after_braces(input_file):
     try:
         with open(input_file, 'r') as f:
@@ -22,5 +24,5 @@ def add_newline_after_braces(input_file):
     print(output_content)
 
 if __name__ == "__main__":
-    input_file = input("Enter the input file name: ")
-    add_newline_after_braces(input_file)
+    add_newline_after_braces(sys.argv[1])
+
