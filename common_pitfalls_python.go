@@ -4,7 +4,6 @@ import "fmt"
 import "errors"
 import "strings"
 import "bufio"
-
 var g_import_aliases map[string]string
 var g_imported_func_alias map[string]string
 
@@ -27,13 +26,10 @@ detection from wordlist: "%s".loads(, pkgname   %s is alias, then we just split 
 then we just print the line number and the vuln
 */
 
-
-
 // check if vulnerable input is delivered to a function like pickle.loads() or os.system() either directly or indirectly --> "Some String %s" % uservar
 func checkFuncArgs(){
 
 }
-
 // This gets called whenever an import is encountered and adds it to to a global map
 func resolveImport(importstr  string) {
 	splitted := strings.Split(importstr," ")
@@ -81,8 +77,6 @@ func checkForKeywords(str string,keywords []string,line int) bool{
 	return false
 }
 
-
-
 // check if single quote string
 func isFormatStringInjectable(str string, isDjango bool) bool {
 	splitted := strings.Split(str,"\"")
@@ -128,16 +122,17 @@ func main(){
         fmt.Println("bad input error")
 	    return
 	}
-
 	//  read in list of function names and formatted strings like: "%sfuncname" where %s is either empty or class.
 	//  before that try resolving imports
 	for i:=0; i<len(buffer); i++{
 		line := buffer[i]
-		_ = line
+		resolveImport(line)
+		
 		// First check for vuln funcs like os's .system, os.writefile pickle.loads, djangos template.render
 	}
-
 	//b := isFormatStringInjectable("\"test %s\" % variable",false)
 	resolveImport("import pkg as p")
+	s := fmt.Sprintf("%sloads(,pickle","p.")
+	fmt.Println(s)
 	return
 }
