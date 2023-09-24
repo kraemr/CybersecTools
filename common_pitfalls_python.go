@@ -21,10 +21,6 @@ detection from wordlist: "%s".loads(, pkgname   %s is alias, then we just split 
 then we just print the line number and the vuln
 */
 
-// check if vulnerable input is delivered to a function like pickle.loads() or os.system() either directly or indirectly --> "Some String %s" % uservar
-func checkFuncArgs(){
-}
-
 // This gets called whenever an import is encountered and adds it to to a global map
 // i fucking hate the python import system, jesus
 func resolveImport(importstr  string) {
@@ -126,10 +122,60 @@ func readFileIntoStringBuf(filestr string) ([]string,error){
 	return lines,sc.Err()
 }
 
+func checkIfUserInputInFromString(line string) bool {
+	return strings.Contains(line,"from_string")==true &&  strings.Contains(line,"request")==true
+}
+
+func checkRawSql(line string) bool {
+	fmtstrinjectable := isFormatStringInjectable(line,false) // is it a format string ?
+	splitted := strings.Split(line,",")
+	params := strings.Contains(splitted[1],"\"") || strings.Contains(splitted[1],"'%s'")
+	return strings.Contains(line,"objects.raw") && (fmtstrinjectable ||  params)
+}
+
+func cursorExec(line string) bool{
+	cursorExecStrFound := strings.Contains(line,"cursor.execute(")
+	fmtstrinjectable := isFormatStringInjectable(line,false) // is it a format string ?
+	return cursorExecStrFound && fmtstrinjectable // if there is the string and format string --> Sqli
+}
+
+func detectDangerousDjango(lines []string,filestr string){
+	for i:=0;i<len(lines);i++ {
+		if checkIfUserInputInFromString(lines[i]){
+			fmt.Printf("User input in from_string Possible SSTI, line:%d, file:%s\n",i,filestr)
+			continue
+		}
+		if checkRawSql(lines[i]){
+			fmt.Printf("Raw sql used and params or format string, line:%d, file:%s\n",i,filestr)
+			continue
+		}
+		if cursorExec(lines[i]){
+			fmt.Printf("cursor exec sql format string possible sqli, line:%d, file:%s\n",i,filestr)
+			continue
+		}
+	}
+}
+
+// no framework
+func normalPy(buffer []string,file string){
+	parsed_funcs,err := parseFunctionDetection("dangerous_python_funcs.txt")
+	_ = err
+	for i:=0; i<len(buffer); i++{
+		line := buffer[i]
+		resolveImport(line)
+		found,message := checkForKeywords(line,parsed_funcs,i)
+		if(found){
+			fmt.Printf("%s line:%d file:%s\n",message,i,file) // try if this output is parseable with jq
+		}
+	}
+}
+
+// if arg 2 is --django then execute the django detection aswell
 func main(){
     argsWithoutProg := os.Args[1:]
 	g_import_aliases = make(map[string]string)
 	g_imported_func_cwe_mapped = make(map[string]string)
+	isdjango := false
 	if len(argsWithoutProg) == 0 {
 		fmt.Println("file name missing")
 		return
@@ -143,14 +189,12 @@ func main(){
         fmt.Println("bad input error")
 	    return
 	}
-	parsed_funcs,err := parseFunctionDetection("dangerous_python_funcs.txt")
-	found,message := checkForKeywords("os.system",parsed_funcs,0)
-	for i:=0; i<len(buffer); i++{
-		line := buffer[i]
-		resolveImport(line)
-		found,message = checkForKeywords(line,parsed_funcs,i)
-		if(found){
-			fmt.Printf("%s line:%d file:%s\n",message,i,argsWithoutProg[0]) // try if this output is parseable with jq
-		}
+	if len(argsWithoutProg) >= 2 {
+		isdjango =  (argsWithoutProg[1] == "--django" || argsWithoutProg[1] == "-dj")
+	}
+	if isdjango {
+		// do detection of bad django stuff
+	}else{
+		normalPy(buffer,argsWithoutProg[0])
 	}
 }
