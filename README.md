@@ -1,3 +1,4 @@
 # CybersecTools
 
-https://www.dan.me.uk/torlist/ List of Tornodes (Use this to make a tool for identifiying tor nodes)
+## subdomain enumeration
+ffuf -u FUZZ.Website.com -w subdomains -t 1 -p 0.1
