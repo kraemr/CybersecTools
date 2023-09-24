@@ -5,20 +5,15 @@ import "errors"
 import "strings"
 import "bufio"
 var g_import_aliases map[string]string
-var g_imported_func_alias map[string]string
+var g_imported_func_cwe_mapped map[string]string // this maps a vulnerable function name to a cwe 
 
 /*
 if there is no alias --> then key "pickle" --> "pickle"
 if there is an alias for pickle called p then key "pickle" --> "p"
-*/
-
-
-/*
 the flow of the program is as follows:
 first we read file into mem
 then we read our wordlists
 then we analyze the lines:
-
 i.e
 p.loads("stuff" % var) 
 
@@ -28,9 +23,10 @@ then we just print the line number and the vuln
 
 // check if vulnerable input is delivered to a function like pickle.loads() or os.system() either directly or indirectly --> "Some String %s" % uservar
 func checkFuncArgs(){
-
 }
+
 // This gets called whenever an import is encountered and adds it to to a global map
+// i fucking hate the python import system, jesus
 func resolveImport(importstr  string) {
 	splitted := strings.Split(importstr," ")
 	if len(splitted) < 2 || !strings.Contains(importstr, "import") {
@@ -61,20 +57,21 @@ func resolveImport(importstr  string) {
 		}else {
 			g_import_aliases[pkg_name] = pkg_name
 		}
-		fmt.Println(g_import_aliases[pkg_name])
 	}
-	
 }
 
 // regex maybe ??
-// basically youll have a wordlist with format strings, where the formatted part gets replaced with the resolved pkg name
-func checkForKeywords(str string,keywords []string,line int) bool{
+// structure message returned so its parsable with jq
+// include CWE number and link
+// give short description
+// line and file that it occurs and why (format string injection, possible user input injection ...)
+func checkForKeywords(str string,keywords []string,line int) (bool,string){
 	for i:=0; i< len(keywords); i++ {
-		if strings.Contains(str,keywords[i]) {
-			return true
+		if strings.Contains(str,keywords[i]) { // also check here if user input is supplied
+			return true,g_imported_func_cwe_mapped[keywords[i]]
 		}
 	}
-	return false
+	return false,""
 }
 
 // check if single quote string
@@ -89,11 +86,36 @@ func isFormatStringInjectable(str string, isDjango bool) bool {
 	return strings.Contains(splitted[2],"%") && strings.Contains(splitted[1],"%s")
 }
 
+// This parses a given function detection file
+func parseFunctionDetection(path string) ([]string,error){
+	lines,err := readFileIntoStringBuf(path)
+	if err != nil{
+		return nil , errors.New("couldnt parse functions file")
+	}
+	var parsed_lines []string 
+	for i:=0; i<len(lines); i++{
+		splitted := strings.Split(lines[i],",")
+		alias := ""
+		if g_import_aliases[splitted[1]] == "" {
+			alias = splitted[1]
+		}else{
+			alias = g_import_aliases[splitted[1]]	
+		}
+		fmt_func_str := strings.TrimSpace(fmt.Sprintf(splitted[0],alias))
+		if len(splitted) < 3{
+
+		}else{
+			g_imported_func_cwe_mapped[fmt_func_str] = splitted[2]
+		}
+		parsed_lines = append(parsed_lines,fmt_func_str)
+	}
+	return parsed_lines,nil
+}
+
 func readFileIntoStringBuf(filestr string) ([]string,error){
     f, err := os.OpenFile(filestr, os.O_RDONLY, os.ModePerm)
 	var lines []string
 	if err != nil {
-        //log.Fatalf("open file error: %v", err)
         return lines,err
     }
     defer f.Close()
@@ -107,32 +129,28 @@ func readFileIntoStringBuf(filestr string) ([]string,error){
 func main(){
     argsWithoutProg := os.Args[1:]
 	g_import_aliases = make(map[string]string)
-	g_imported_func_alias = make(map[string]string)
-	g_import_aliases["test"] = "test"
-	if len(argsWithoutProg) == 0{
+	g_imported_func_cwe_mapped = make(map[string]string)
+	if len(argsWithoutProg) == 0 {
 		fmt.Println("file name missing")
 		return
 	}
 	buffer, err := readFileIntoStringBuf(argsWithoutProg[0]) // the file name
-	if len(buffer) == 0{
+	if len(buffer) == 0 {
         fmt.Println("empty file")
 		return
 	}
-	if errors.Is(err,errors.New("bad input")){
+	if errors.Is(err,errors.New("bad input")) {
         fmt.Println("bad input error")
 	    return
 	}
-	//  read in list of function names and formatted strings like: "%sfuncname" where %s is either empty or class.
-	//  before that try resolving imports
+	parsed_funcs,err := parseFunctionDetection("dangerous_python_funcs.txt")
+	found,message := checkForKeywords("os.system",parsed_funcs,0)
 	for i:=0; i<len(buffer); i++{
 		line := buffer[i]
 		resolveImport(line)
-		
-		// First check for vuln funcs like os's .system, os.writefile pickle.loads, djangos template.render
+		found,message = checkForKeywords(line,parsed_funcs,i)
+		if(found){
+			fmt.Printf("%s line:%d file:%s\n",message,i,argsWithoutProg[0]) // try if this output is parseable with jq
+		}
 	}
-	//b := isFormatStringInjectable("\"test %s\" % variable",false)
-	resolveImport("import pkg as p")
-	s := fmt.Sprintf("%sloads(,pickle","p.")
-	fmt.Println(s)
-	return
 }

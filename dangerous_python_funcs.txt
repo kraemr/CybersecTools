@@ -1,18 +1,4 @@
-%s.loads(,pickle
-%s.putenv(,os
-%s.unsetenv(,os
-%s.fdopen(,os
-%s.pipe(,os
-%s.pwrite(,os
-%s.read(,os
-%s.sendfile(,os
-%s.write(,os
-%s.chdir(,os
-%s.link(,os
-%s.listdir(,os
-%s.system(,os
-%s.memfd_create(,os
-%s.add_dll_directory(,os
-%s.exec,os
-%s.fork,os
-%s.posix_spawn,os
+%s.loads,pickle,CWE-502: Deserialization of Untrusted Data link:https://cwe.mitre.org/data/definitions/502.html
+%s.putenv,os,CWE-15: External Control of System or Configuration Setting link:https://cwe.mitre.org/data/definitions/15.html
+%s.unsetenv,os,CWE-15: External Control of System or Configuration Setting link:https://cwe.mitre.org/data/definitions/15.html
+%s.system,os,CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') link:https://cwe.mitre.org/data/definitions/78.html
