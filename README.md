@@ -16,11 +16,12 @@
 The Goal here is to find interesting Targets/Endpoints here like /login, /search , /dashboard, /admin ...
 
 ## EXPLOITATION STEP 3
-Exploits Sites: 
+Exploits: 
 - https://packetstormsecurity.com/files/tags/exploit
 - 0day.today
 - exploit-db
 - snyk
+- PayloadsAllTheThings
 </br>
 64 ways to find a password:
 https://youtu.be/Qm7k1CPFkIc
