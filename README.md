@@ -20,7 +20,6 @@ Exploits Sites:
 - https://packetstormsecurity.com/files/tags/exploit
 - 0day.today
 - exploit-db
-Hit:10 http://packages.linuxmint.com vanessa Release
 - snyk
 </br>
 64 ways to find a password:
