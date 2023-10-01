@@ -15,7 +15,7 @@
 </br>
 The Goal here is to find interesting Targets/Endpoints here like /login, /search , /dashboard, /admin ...
 
-## EXPLOITATION STEP3
+## EXPLOITATION STEP 3
 Exploits Sites: 
 - https://packetstormsecurity.com/files/tags/exploit
 - 0day.today
@@ -32,3 +32,9 @@ If its node.js try prototype pollution
 If it seems as if the payload triggers sql query --> Sqli
 
 ### Xml Endpoint ?
+- XML xxe
+- libxml cve exploit, other related xml exploits (body-parse-xml cve ...)
+
+### Jsonp
+- modify callback and try to find other methods executable
+- Array access in payload ?? throw a -1 in there as index and an absurdly large number like 10000000000000000000 --> Error/Overflow ?
