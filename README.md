@@ -8,10 +8,27 @@
 
 ## Active Recon STEP 2
 - Open Ports: Nmap
-- Detect Web Tech/Framework: Wappalyzer
+- Detect Web Tech/Framework: Wappalyzer, Error based Version Detection
 - Interesting Stuff: sitemap.xml,robots.txt,security.txt
 - Fuzzing: use FFuf for subdomains,endpoints enumeration
-- DNS/Path: dig 
+- DNS/Path: dig
+</br>
 The Goal here is to find interesting Targets/Endpoints here like /login, /search , /dashboard, /admin ...
 
-##
+## EXPLOITATION STEP3
+Exploits Sites: 
+- https://packetstormsecurity.com/files/tags/exploit
+- 0day.today
+- exploit-db
+- snyk
+</br>
+### Image Upload API?
+- ImageMagick and similiar Library cve's
+- svg xml xxe
+
+### Json Endpoint?
+If its node.js try prototype pollution
+</br>
+If it seems as if the payload triggers sql query --> Sqli
+
+### Xml Endpoint ?
