@@ -1,12 +1,18 @@
 package main;
 import "net/http"
-//import "fmt"
+import "fmt"
 import "io/ioutil"
 import "strings"
 import "io"
 import "strconv"
+import "os"
+import "time"
+
 var lines []string
 var ipv4decs []uint32
+var updating bool
+var updatetime time.Time
+
 func ipv4ToDec(ip string) uint32{
 	splitted := strings.Split(ip,".")
 	if len(splitted) != 4{
@@ -66,6 +72,7 @@ func readIpDecs() []uint32{
     for i:=0;i<len(lines);i++{
 	ipv4dec :=	ipv4ToDec(lines[i])
 	if ipv4dec == 0 ||ipv4dec == 1 {
+		//Not an Ip or malformed
 	}else{
 		ipdecs = append(ipdecs,ipv4dec)
     	}
@@ -85,6 +92,14 @@ func readIpDecs() []uint32{
 
 func getTorIp(w http.ResponseWriter, r *http.Request){
 	ip := strings.Trim( r.URL.Query().Get("ip")," ")
+        now := time.Now()
+	diff := updatetime.Sub(now)
+	fmt.Println(diff.Minutes())
+	if diff.Minutes() <= -1 {
+	   updatetime = now
+	   ipv4decs=readIpDecs()
+	   fmt.Println("Updated")
+	}
 	exists:=binarysearch_ipv4(ipv4decs,ip)
 	if exists{
 		io.WriteString(w,"1")
@@ -94,9 +109,12 @@ func getTorIp(w http.ResponseWriter, r *http.Request){
 }
 
 func main(){
+     fmt.Println()
+     updatetime = time.Now()
      ipv4decs=readIpDecs()
      http.HandleFunc("/", getTorIp)
      err := http.ListenAndServe(":4343", nil)
      _ = err
+    _ = os.Args
 }
 
