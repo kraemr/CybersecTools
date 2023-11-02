@@ -1,4 +1,0 @@
-%s.loads,pickle,CWE-502: Deserialization of Untrusted Data link:https://cwe.mitre.org/data/definitions/502.html
-%s.putenv,os,CWE-15: External Control of System or Configuration Setting link:https://cwe.mitre.org/data/definitions/15.html
-%s.unsetenv,os,CWE-15: External Control of System or Configuration Setting link:https://cwe.mitre.org/data/definitions/15.html
-%s.system,os,CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') link:https://cwe.mitre.org/data/definitions/78.html
