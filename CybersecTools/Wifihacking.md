@@ -13,9 +13,4 @@ sudo systemctl start NetworkManager.service
 hcxpcapngtool -o hash.hc22000 -E essidlist dumpfile.pcapng
 
 hashcat -m 22000 hash.hc22000 wordlist.txt
-
-Windows:
-hashcat.exe -m 22000 hash.hc22000 -a 3 ?d?d?d?d?d?d?d?d
-
-hashcat.exe -m 22000 hash.hc22000 -a 3 --increment --increment-min 8 --increment-max 18 ?d?d?d?d?d?d?d?d?d?d?d?d?d?d?d?d?d?d
 ```
