@@ -2,6 +2,7 @@
 
 ## For: WPA-PBKDF2-PMKID+EAPOL
 ```bash
+# Video: https://youtu.be/Em9ouieR0AY
 sudo systemctl stop NetworkManager.service
 sudo systemctl stop wpa_supplicant.service
 
